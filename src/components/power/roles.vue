@@ -47,13 +47,12 @@
           <el-button @click="dialogVisible=true" icon="el-icon-setting" type="warning" size="mini">分配权限</el-button>
         </el-table-column>
       </el-table>
-      <!-- 分配角色对话框 -->
+      <!-- 分配权限对话框 -->
       <el-dialog
-        title="提示"
+        title="分配权限"
         :visible.sync="dialogVisible"
         width="30%"
         :before-close="handleClose">
-        <span>分配权限</span>
         <!-- 树形控件 -->
         <el-tree
           :data="rightsTree"
@@ -80,7 +79,7 @@ export default {
       rightsTree: [],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'authName'
       }
     }
   },
