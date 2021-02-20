@@ -42,9 +42,11 @@
         <el-table-column align='center' prop="roleName" label="角色名称"></el-table-column>
         <el-table-column align='center' prop="roleDesc" label="角色描述"> </el-table-column>
         <el-table-column align='center' label="操作">
-          <el-button icon="el-icon-edit" type="primary" size="mini">编辑</el-button>
-          <el-button icon="el-icon-delete" type="danger" size="mini">删除</el-button>
-          <el-button @click="dialogVisible=true" icon="el-icon-setting" type="warning" size="mini">分配权限</el-button>
+          <template slot-scope="scope">
+            <el-button icon="el-icon-edit" type="primary" size="mini">编辑</el-button>
+            <el-button icon="el-icon-delete" type="danger" size="mini">删除</el-button>
+            <el-button @click="showRightsDialog(scope.row)" icon="el-icon-setting" type="warning" size="mini">分配权限</el-button>
+          </template>
         </el-table-column>
       </el-table>
       <!-- 分配权限对话框 -->
@@ -55,16 +57,17 @@
         :before-close="handleClose">
         <!-- 树形控件 -->
         <el-tree
+          ref="rightsTreeRef"
+          default-expand-all
           :data="rightsTree"
           show-checkbox
           node-key="id"
-          :default-expanded-keys="[2, 3]"
-          :default-checked-keys="[5]"
+          :default-checked-keys="defaultChecked"
           :props="defaultProps">
         </el-tree>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+          <el-button type="primary" @click="allotRights">确 定</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -80,12 +83,14 @@ export default {
       defaultProps: {
         children: 'children',
         label: 'authName'
-      }
+      },
+      // 默认选中的节点
+      defaultChecked: [],
+      roleId: ''
     }
   },
   created() {
     this.getRolesList()
-    this.getRightsTree()
   },
   methods: {
     // 获取用户列表
@@ -98,11 +103,47 @@ export default {
       if (result.meta.status !== 200) return this.$message.error(result.meta.msg)
       roles.children = result.data
     },
-    async getRightsTree() {
+    // 关闭对话框
+    handleClose() {
+      this.dialogVisible = false
+      this.defaultChecked = []
+    },
+    async showRightsDialog(role) {
+      // 当前角色的id
+      this.roleId = role.id
+      // 获取权限列表
       const { data: result } = await this.$http.get('rights/tree')
       this.rightsTree = result.data
+      this.getLeafKeys(role, this.defaultChecked)
+      this.dialogVisible = true
     },
-    handleClose() {
+    // 通过递归函数将三级权限的id添加到arr中
+    getLeafKeys(node, arr) {
+      // 如果是三级权限
+      if (!node.children) {
+        // 将id属性添加到arr中
+        return arr.push(node.id)
+      }
+      node.children.forEach(element => {
+        this.getLeafKeys(element, arr)
+      })
+    },
+    // 确定分配权限
+    async allotRights() {
+      // 获取选中的权限
+      const keys = [
+        ...this.$refs.rightsTreeRef.getCheckedKeys(),
+        ...this.$refs.rightsTreeRef.getHalfCheckedKeys()
+      ]
+      // 将权限数组转换为以 , 分割的字符串
+      const strId = keys.join(',')
+      // 更改服务端值
+      const { data: result } = await this.$http.post(`roles/${this.roleId}/rights`, {
+        rids: strId
+      })
+      if (result.meta.status !== 200) return this.$message.error(result.meta.msg)
+      this.$message.success(result.meta.msg)
+      this.getRolesList()
       this.dialogVisible = false
     }
   }
