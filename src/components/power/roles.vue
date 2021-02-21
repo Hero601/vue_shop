@@ -149,7 +149,7 @@ export default {
   }
 }
 </script>
-<style lang="css">
+<style lang="css" scoped>
 /* 下边框线 */
 .dbBottom{
   border-bottom: 1px solid #eee

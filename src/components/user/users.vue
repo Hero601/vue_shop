@@ -454,7 +454,7 @@ export default {
   }
 }
 </script>
-<style lang="css">
+<style lang="css" scoped>
 .el-card {
   margin-top: 20px;
 }
