@@ -4,7 +4,7 @@
     <el-header>
       <div>
         <img src="../assets/logo.png" />
-        <span>电商后台管理系统</span>
+        <span>津东后台管理系统</span>
       </div>
       <el-button id="logout" @click="logout">退出登录</el-button>
     </el-header>
@@ -25,13 +25,17 @@
             router
           >
             <el-submenu
-              v-for="item in menuList"
+              v-for="(item, index) in menuList"
               :key="item.id"
               :index="'/'+item.path"
             >
               <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>{{ item.authName }}</span>
+                <i v-if="index === 0" class="iconfont icon-yonghu"></i>
+                <i v-else-if="index === 1" class="iconfont icon-quanxian"></i>
+                <i v-else-if="index === 2" class="iconfont icon-shangpin"></i>
+                <i v-else-if="index === 3" class="iconfont icon-5"></i>
+                <i v-else class="iconfont icon-shuju"></i>
+                <span class="alideText">{{ item.authName }}</span>
               </template>
               <el-menu-item
                 v-for="subItem in item.children"
@@ -124,5 +128,8 @@ export default {
 #logout{
   margin-top: 8px;
   height: 40px;
+}
+.alideText{
+  padding-left: 10px;
 }
 </style>
