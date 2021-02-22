@@ -7,7 +7,7 @@
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card class="box-card">
-      <el-button type="primary">添加角色</el-button>
+      <el-button type="primary" @click='addRolesDialogVisible=true'>添加角色</el-button>
       <el-table stripe :data="rolesList" border style="width: 100%">
         <!-- 展开列 -->
         <el-table-column type="expand">
@@ -44,7 +44,7 @@
         <el-table-column align='center' label="操作">
           <template slot-scope="scope">
             <el-button icon="el-icon-edit" type="primary" size="mini">编辑</el-button>
-            <el-button icon="el-icon-delete" type="danger" size="mini">删除</el-button>
+            <el-button icon="el-icon-delete" @click='removeRoles(scope.row.id)' type="danger" size="mini">删除</el-button>
             <el-button @click="showRightsDialog(scope.row)" icon="el-icon-setting" type="warning" size="mini">分配权限</el-button>
           </template>
         </el-table-column>
@@ -70,6 +70,27 @@
           <el-button type="primary" @click="allotRights">确 定</el-button>
         </span>
       </el-dialog>
+
+      <!-- 添加角色对话框 -->
+      <el-dialog
+        title="添加角色"
+        :visible.sync="addRolesDialogVisible"
+        width="30%"
+        :before-close="addRolesDialogClose">
+        <!-- 添加角色表单 -->
+        <el-form ref="addRolesFormRef" :rules="addRolesFormRules" :model="addRolesForm" label-width="80px">
+          <el-form-item prop="roleName" label="角色名称">
+            <el-input v-model="addRolesForm.roleName"></el-input>
+          </el-form-item>
+          <el-form-item prop="roleDesc" label="角色描述">
+            <el-input v-model="addRolesForm.roleDesc"></el-input>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="addRolesDialogClose">取 消</el-button>
+          <el-button type="primary" @click="addRoles">确 定</el-button>
+        </span>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -86,7 +107,23 @@ export default {
       },
       // 默认选中的节点
       defaultChecked: [],
-      roleId: ''
+      roleId: '',
+      // 是否显示添加角色对话框
+      addRolesDialogVisible: false,
+      // 添加角色表单对象
+      addRolesForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      // 添加角色表单验证对象
+      addRolesFormRules: {
+        roleName: [
+          { required: true, message: '请输入角色名', trigger: 'blur' }
+        ],
+        roleDesc: [
+          { required: true, message: '请输入角色描述', trigger: 'blur' }
+        ]
+      }
     }
   },
   created() {
@@ -145,6 +182,30 @@ export default {
       this.$message.success(result.meta.msg)
       this.getRolesList()
       this.dialogVisible = false
+    },
+    // 添加用户对话框的关闭事件
+    addRolesDialogClose() {
+      // 清空表单
+      this.$refs.addRolesFormRef.resetFields()
+      this.addRolesDialogVisible = false
+    },
+    // 发起添加角色请求
+    addRoles() {
+      this.$refs.addRolesFormRef.validate(async valid => {
+        if (!valid) return
+        const { data: result } = await this.$http.post('roles', this.addRolesForm)
+        if (result.meta.status !== 201) return this.$message.error(result.meta.msg)
+        this.$message.success(result.meta.msg)
+        this.addRolesDialogClose()
+        this.getRolesList()
+      })
+    },
+    // 删除角色
+    async removeRoles(id) {
+      const { data: result } = await this.$http.delete(`roles/${id}`)
+      if (result.meta.status !== 200) return this.$message.error(result.meta.msg)
+      this.getRolesList()
+      return this.$message.success(result.meta.msg)
     }
   }
 }
@@ -163,8 +224,15 @@ export default {
   margin: 7px;
 }
 
+.el-card {
+  margin-top: 20px
+}
+
 .center{
   display: flex;
   align-items: center;
+}
+.el-table {
+  margin-top: 20px;
 }
 </style>

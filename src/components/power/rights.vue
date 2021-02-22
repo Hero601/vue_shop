@@ -42,4 +42,8 @@ export default {
   }
 }
 </script>
-<style lang="css" scoped></style>
+<style lang="css" scoped>
+.el-card {
+  margin-top: 20px
+}
+</style>
