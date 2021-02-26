@@ -4,7 +4,7 @@
     <el-header>
       <div>
         <img src="../assets/logo.png" />
-        <span>津东后台管理系统</span>
+        <span>并夕夕后台管理系统</span>
       </div>
       <el-button id="logout" @click="logout">退出登录</el-button>
     </el-header>
