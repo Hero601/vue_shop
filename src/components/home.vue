@@ -23,6 +23,7 @@
             active-text-color="#ffd04b"
             unique-opened
             router
+            :default-active="activePath"
           >
             <el-submenu
               v-for="(item, index) in menuList"
@@ -41,6 +42,7 @@
                 v-for="subItem in item.children"
                 :key="subItem.id"
                 :index="'/'+subItem.path"
+                @click='saveNavState("/"+subItem.path)'
               >
                 <template slot="title">
                   <i class="el-icon-menu"></i>
@@ -63,7 +65,8 @@ export default {
   data() {
     return {
       menuList: [],
-      isCollapse: false
+      isCollapse: false,
+      activePath: ''
     }
   },
   methods: {
@@ -81,10 +84,16 @@ export default {
     },
     collapseChange() {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存当前链接激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   },
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   }
 }
 </script>

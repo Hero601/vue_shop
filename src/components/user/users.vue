@@ -408,7 +408,20 @@ export default {
       }).then(async () => {
         const { data: result } = await this.$http.delete(`users/${id}`)
         if (result.meta.status !== 200) return this.$message.error(result.meta.msg)
-        this.getUserList()
+        // 处理bug，删除列表最后一条数据为空
+        const { data: resultTemp } = await this.$http('users', {
+          params: this.queryInfo
+        })
+        // 如果为空
+        if (resultTemp.data.users.length === 0) {
+          // 将pagenum--
+          this.queryInfo.pagenum--
+          // 获取用户
+          this.getUserList()
+        } else {
+          // 直接赋值
+          this.userList = resultTemp.data.users
+        }
         return this.$message({
           type: 'success',
           message: '删除成功!'
